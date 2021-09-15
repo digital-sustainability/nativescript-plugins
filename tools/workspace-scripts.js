@@ -63,6 +63,13 @@ module.exports = {
 		// packages
 		// build output is always in dist/packages
 		'@digital-sustainability': {
+			// @digital-sustainability/nativescript-app-auth
+			'nativescript-app-auth': {
+				build: {
+					script: 'nx run nativescript-app-auth:build.all',
+					description: '@digital-sustainability/nativescript-app-auth: Build',
+				},
+			},
 			'build-all': {
 				script: 'nx run all:build',
 				description: 'Build all packages',
@@ -73,6 +80,10 @@ module.exports = {
 			description: '_____________  Focus (VS Code supported)  _____________',
 		},
 		focus: {
+			'nativescript-app-auth': {
+				script: 'nx run nativescript-app-auth:focus',
+				description: 'Focus on @digital-sustainability/nativescript-app-auth',
+			},
 			reset: {
 				script: 'nx run all:focus',
 				description: 'Reset Focus',

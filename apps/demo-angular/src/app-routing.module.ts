@@ -6,7 +6,8 @@ import { HomeComponent } from './home.component';
 
 const routes: Routes = [
    { path: '', redirectTo: '/home', pathMatch: 'full' },
-   { path: 'home', component: HomeComponent }
+   { path: 'home', component: HomeComponent },
+	{ path: 'nativescript-app-auth', loadChildren: () => import('./plugin-demos/nativescript-app-auth.module').then(m => m.NativescriptAppAuthModule) }
 ];
 
 @NgModule({

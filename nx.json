@@ -22,6 +22,9 @@
     },
     "all": {
       "tags": []
+    },
+    "nativescript-app-auth": {
+      "tags": []
     }
   },
   "workspaceLayout": {

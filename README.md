@@ -5,7 +5,7 @@ npm run setup
 npm start
 ```
 
-- @digital-sustainability
+- @digital-sustainability/nativescript-app-auth
 
 # How to use?
 

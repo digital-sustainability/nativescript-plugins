@@ -78,14 +78,16 @@
       "projectType": "library",
       "targets": {
         "build": {
+          "executor": "@nrwl/workspace:run-commands",
           "outputs": [
             "dist/packages"
           ],
           "options": {
-            "commands": [],
+            "commands": [
+              "nx run nativescript-app-auth:build.all"
+            ],
             "parallel": false
-          },
-          "executor": "@nrwl/workspace:run-commands"
+          }
         },
         "focus": {
           "outputs": [
@@ -98,6 +100,51 @@
             "parallel": false
           },
           "executor": "@nrwl/workspace:run-commands"
+        }
+      }
+    },
+    "nativescript-app-auth": {
+      "root": "packages/nativescript-app-auth",
+      "projectType": "library",
+      "sourceRoot": "packages/nativescript-app-auth",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/node:package",
+          "options": {
+            "outputPath": "dist/packages/nativescript-app-auth",
+            "tsConfig": "packages/nativescript-app-auth/tsconfig.json",
+            "packageJson": "packages/nativescript-app-auth/package.json",
+            "main": "packages/nativescript-app-auth/index.d.ts",
+            "assets": [
+              "packages/nativescript-app-auth/*.md",
+              "packages/nativescript-app-auth/index.d.ts",
+              "LICENSE",
+              {
+                "glob": "**/*",
+                "input": "packages/nativescript-app-auth/platforms/",
+                "output": "./platforms/"
+              }
+            ]
+          }
+        },
+        "build.all": {
+          "executor": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              "nx run nativescript-app-auth:build",
+              "node tools/scripts/build-finish.ts nativescript-app-auth"
+            ],
+            "parallel": false
+          }
+        },
+        "focus": {
+          "executor": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              "nx g @nativescript/plugin-tools:focus-packages nativescript-app-auth"
+            ],
+            "parallel": false
+          }
         }
       }
     }
