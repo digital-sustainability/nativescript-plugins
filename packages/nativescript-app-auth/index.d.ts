@@ -1,7 +1,7 @@
 import { NativescriptAppAuthCommon } from './common';
 
 export declare class NativescriptAppAuth extends NativescriptAppAuthCommon {
-    
+    static authorize(config: AuthConfiguration); 
 }
 
 export interface ServiceConfiguration {
