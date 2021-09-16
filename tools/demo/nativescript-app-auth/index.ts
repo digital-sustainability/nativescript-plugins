@@ -9,6 +9,10 @@ export class DemoSharedNativescriptAppAuth extends DemoSharedBase {
       redirectUrl: '<YOUR_REDIRECT_URL>',
       scopes: ['<YOUR_SCOPE_ARRAY>'],
     };
-    NativescriptAppAuth.authorize(config)
+    NativescriptAppAuth.authorize(config).then(
+      auth => console.log(`log auth: ${auth}`)
+    ).catch(
+      (err) => console.log(`log error: ${err}`)
+    )
   }
 }
