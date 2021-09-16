@@ -19,7 +19,6 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         NSURL.URLWithString(issuer), 
         (fetchedConfiguration, error) => {
           if (error) {
-            console.error(error)
             reject(error)
           }
           this.authorizeWithConfiguration(fetchedConfiguration, clientId, redirectUrl, scopes, resolve, reject)
@@ -47,8 +46,14 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         if (error != null) {
           reject(error)
         }
-        console.log(authState)
-        resolve(authState)
+        resolve({
+          accessToken: authState.lastTokenResponse.accessToken,
+          idToken: authState.lastTokenResponse.idToken,
+          refreshToken: authState.lastTokenResponse.refreshToken,
+          tokenType: authState.lastTokenResponse.tokenType,
+          scopes: authState.lastTokenResponse.scopes?.split(" ") ?? [],
+          authorizationCode: authState.lastTokenResponse.authorizationCode,
+        })
       }
     )
   }
