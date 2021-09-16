@@ -1,9 +1,14 @@
 import { DemoSharedBase } from '../utils';
-import {  } from '@digital-sustainability/nativescript-app-auth';
+import { AuthConfiguration, NativescriptAppAuth } from '@digital-sustainability/nativescript-app-auth';
 
 export class DemoSharedNativescriptAppAuth extends DemoSharedBase {
-
   testIt() {
-    console.log('test nativescript-app-auth!');
+    const config: AuthConfiguration = {
+      issuer: '<YOUR_ISSUER_URL>',
+      clientId: '<YOUR_CLIENT_ID>',
+      redirectUrl: '<YOUR_REDIRECT_URL>',
+      scopes: ['<YOUR_SCOPE_ARRAY>'],
+    };
+    NativescriptAppAuth.authorize(config)
   }
 }

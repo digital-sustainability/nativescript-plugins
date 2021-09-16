@@ -11,6 +11,9 @@ android {
     minSdkVersion 21
     targetSdkVersion 29
     generatedDensities = []
+    manifestPlaceholders = [
+      appAuthRedirectScheme: '<YOUR_REDIRECT_SCHEME>'
+    ]
   }  
   aaptOptions {  
     additionalParameters "--no-version-vectors"  
