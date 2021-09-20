@@ -2,11 +2,6 @@ import { Application } from '@nativescript/core';
 import { AuthConfiguration, AuthorizeResult, ServiceConfiguration } from '.';
 import { NativescriptAppAuthCommon } from './common';
 
-// TODO: generate typing from AppAuth
-declare var OIDAuthorizationService;
-declare var OIDAuthorizationRequest;
-declare var OIDResponseTypeCode;
-declare var OIDAuthState
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
   static authorize({ serviceConfiguration, clientId, redirectUrl, issuer, scopes}: AuthConfiguration): Promise<AuthorizeResult> {
     if (serviceConfiguration != null) {
