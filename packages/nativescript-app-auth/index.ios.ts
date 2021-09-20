@@ -4,9 +4,10 @@ import { NativescriptAppAuthCommon } from './common';
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
   static authorize({ serviceConfiguration, clientId, redirectUrl, issuer, scopes}: AuthConfiguration): Promise<AuthorizeResult> {
-    if (serviceConfiguration != null) {
+    if (this.isServiceConfiguration(serviceConfiguration)) {
+      const config = this.createServiceConfiguration(serviceConfiguration);
       return new Promise<AuthorizeResult>(
-        (resolve, reject) => this.authorizeWithConfiguration(serviceConfiguration, clientId, redirectUrl, scopes, resolve, reject)
+        (resolve, reject) => this.authorizeWithConfiguration(config, clientId, redirectUrl, scopes, resolve, reject)
       );
     }
     return new Promise<AuthorizeResult>(
@@ -22,8 +23,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     )
   }
 
-  private static authorizeWithConfiguration(config: ServiceConfiguration, clientId: string, redirectUri: string, scopes: string[], resolve, reject): void {
-    const additionalParameters = NSDictionary.new(); 
+  private static authorizeWithConfiguration(config: OIDServiceConfiguration, clientId: string, redirectUri: string, scopes: string[], resolve, reject): void {
+    const additionalParameters = NSDictionary.new<string,string>(); 
     const req = OIDAuthorizationRequest.alloc()
       .initWithConfigurationClientIdScopesRedirectURLResponseTypeAdditionalParameters(
         config, 
@@ -46,10 +47,30 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           idToken: authState.lastTokenResponse.idToken,
           refreshToken: authState.lastTokenResponse.refreshToken,
           tokenType: authState.lastTokenResponse.tokenType,
-          scopes: authState.lastTokenResponse.scopes?.split(" ") ?? [],
-          authorizationCode: authState.lastTokenResponse.authorizationCode,
+          scopes: authState.lastTokenResponse.scope?.split(" ") ?? [],
+          authorizationCode: authState.lastTokenResponse.request.authorizationCode,
         })
       }
     )
+  }
+
+  private static createServiceConfiguration(serviceConfiguration: ServiceConfiguration ): OIDServiceConfiguration {
+    const config = {
+      authorizationEndpoint: NSURL.URLWithString(serviceConfiguration.authorizationEndpoint),
+      tokenEndpoint: NSURL.URLWithString(serviceConfiguration.tokenEndpoint),
+    };
+
+    const { registrationEndpoint } = serviceConfiguration;
+    if (registrationEndpoint) {
+      config['registrationEndpoint'] = NSURL.URLWithString(registrationEndpoint);
+    }
+
+    return new OIDServiceConfiguration(config);
+  }
+
+  private static isServiceConfiguration (obj: unknown): obj is ServiceConfiguration {
+    return obj != null &&
+      typeof (obj as ServiceConfiguration).authorizationEndpoint === 'string' &&
+      typeof (obj as ServiceConfiguration).tokenEndpoint === 'string'
   }
 }
