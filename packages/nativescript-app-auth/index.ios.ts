@@ -67,10 +67,4 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
     return new OIDServiceConfiguration(config);
   }
-
-  private static isServiceConfiguration (obj: unknown): obj is ServiceConfiguration {
-    return obj != null &&
-      typeof (obj as ServiceConfiguration).authorizationEndpoint === 'string' &&
-      typeof (obj as ServiceConfiguration).tokenEndpoint === 'string'
-  }
 }
