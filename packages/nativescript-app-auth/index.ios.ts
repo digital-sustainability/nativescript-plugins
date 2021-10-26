@@ -16,6 +16,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         (fetchedConfiguration, error) => {
           if (error) {
             reject(error)
+            return;
           }
           this.authorizeWithConfiguration(fetchedConfiguration, clientId, redirectUrl, scopes, resolve, reject)
         }
@@ -41,6 +42,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       (authState, error) => {
         if (error != null) {
           reject(error)
+          return;
+        }
+        // TODO: add typeguard
+        if (authState == null) {
+          reject('authState is undefined');
+          return;
         }
         resolve({
           accessToken: authState.lastTokenResponse.accessToken,

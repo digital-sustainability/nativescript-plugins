@@ -6,15 +6,26 @@ const RC_AUTH = 52;
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
   private static _onActivityResult({ requestCode, intent }: AndroidActivityResultEventData): void {
-    // == null checks for undefined as well
-    if (requestCode !== RC_AUTH || intent == null) {
+    if (requestCode !== RC_AUTH) {
       return
     }
 
     // @ts-ignore
     const {resolve, reject } = this;
 
+    // == null checks for undefined as well
+    if (intent == null) {
+      reject('error: intent is null')
+      return;
+    }
+
     const response = net.openid.appauth.AuthorizationResponse.fromIntent(intent)
+
+    if (response == null) {
+      reject('error: response is null');
+      return;
+    }
+
     const context = Utils.android.getApplicationContext();
     // Create service with default config
     const authService = new net.openid.appauth.AuthorizationService(context)
@@ -27,6 +38,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         onTokenRequestCompleted(resp, error) {
           if (error != null) {
             reject(error);
+            return;
           }
           if (resp) {
             resolve({
