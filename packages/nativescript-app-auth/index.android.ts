@@ -10,6 +10,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       return
     }
 
+    Application.android.off(AndroidApplication.activityResultEvent, NativescriptAppAuth._onActivityResult);
+
     // @ts-ignore
     const {resolve, reject } = this;
 
@@ -57,7 +59,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
   }
 
   private static authorizeWithConfiguration(config: net.openid.appauth.AuthorizationServiceConfiguration, clientId: string, redirectUri: string, scopes: string[], resolve, reject): void {
-    Application.android.once(AndroidApplication.activityResultEvent, NativescriptAppAuth._onActivityResult, {resolve, reject});
+    Application.android.on(AndroidApplication.activityResultEvent, NativescriptAppAuth._onActivityResult, {resolve, reject});
 
     const authRequestBuilder = new net.openid.appauth.AuthorizationRequest.Builder(
       config, 
