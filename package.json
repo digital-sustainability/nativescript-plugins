@@ -44,5 +44,7 @@
 			"npx prettier --write"
 		]
 	},
-	"dependencies": {}
+	"dependencies": {
+		"@nativescript/secure-storage": "^3.0.0"
+	}
 }

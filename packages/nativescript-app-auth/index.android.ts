@@ -11,23 +11,15 @@ import {
 	ServiceConfiguration,
 } from '.';
 import { NativescriptAppAuthCommon } from './common';
-import * as application from '@nativescript/core/application';
 
 const RC_AUTH = 52;
-const STORE_NAME = 'AuthState';
-const KEY_STATE = 'state';
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 	private authState: net.openid.appauth.AuthState;
-	private mPrefs: android.content.SharedPreferences;
 
 	constructor() {
 		super();
-		this.mPrefs = application.android.context.getSharedPreferences(
-			STORE_NAME,
-			android.content.Context.MODE_PRIVATE
-		);
-		this.authState = this.readState();
+		this.authState = this.loadState();
 	}
 
 	private _onActivityResult({
@@ -193,7 +185,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 							return reject(ex);
 						}
 
-						self.writeState(self.authState);
+						self.saveState(self.authState);
 						return resolve({ accessToken, idToken });
 					},
 				})
@@ -225,30 +217,22 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 		ex: net.openid.appauth.AuthorizationException
 	) {
 		this.authState.update(resp as any, ex);
-		this.writeState(this.authState);
+		this.saveState(this.authState);
 	}
 
-	private writeState(state: net.openid.appauth.AuthState): void {
-		const editor: android.content.SharedPreferences.Editor = this.mPrefs.edit();
-		if (state == null) {
-			editor.remove(KEY_STATE);
-		} else {
-			editor.putString(KEY_STATE, state.jsonSerializeString());
-		}
-
-		if (!editor.commit()) {
-			throw new Error('Failed to write state to shared prefs');
-		}
+	private saveState(state: net.openid.appauth.AuthState): void {
+		const serializedState = state.jsonSerializeString();
+		this.writeState(serializedState);
 	}
 
-	private readState(): net.openid.appauth.AuthState {
-		const currentState = this.mPrefs.getString(KEY_STATE, null);
-		if (currentState == null) {
+	private loadState(): net.openid.appauth.AuthState {
+		const serializedState = this.readState();
+		if (serializedState == null) {
 			return new net.openid.appauth.AuthState();
 		}
 
 		try {
-			return net.openid.appauth.AuthState.jsonDeserialize(currentState);
+			return net.openid.appauth.AuthState.jsonDeserialize(serializedState);
 		} catch (error) {
 			console.log('Failed to deserialize stored auth state - discarding');
 			return new net.openid.appauth.AuthState();

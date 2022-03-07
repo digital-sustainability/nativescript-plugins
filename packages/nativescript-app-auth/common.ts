@@ -1,7 +1,8 @@
 import { SecureStorage } from '@nativescript/secure-storage';
 import { ServiceConfiguration } from '.';
 
-const STATE_KEY = 'state';
+const STATE_KEY = 'appAuthState';
+
 export class NativescriptAppAuthCommon {
 	private secureStorage: SecureStorage;
 
