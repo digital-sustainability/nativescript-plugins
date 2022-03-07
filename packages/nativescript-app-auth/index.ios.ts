@@ -1,8 +1,20 @@
 import { Application } from '@nativescript/core';
-import { AuthConfiguration, AuthorizeResult, ServiceConfiguration } from '.';
+import {
+	AuthConfiguration,
+	AuthorizeResult,
+	FreshTokenConfiguration,
+	ServiceConfiguration,
+} from '.';
 import { NativescriptAppAuthCommon } from './common';
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
+	private authState: OIDAuthState;
+
+	constructor() {
+		super();
+		this.authState = this.loadState();
+	}
+
 	authorize({
 		serviceConfiguration,
 		clientId,
@@ -44,6 +56,24 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 		);
 	}
 
+	fetchFreshTokens(): Promise<FreshTokenConfiguration> {
+		const self = this;
+		return new Promise<FreshTokenConfiguration>((resolve, reject) => {
+			this.authState.performActionWithFreshTokens(
+				(accessToken, idToken, error) => {
+					if (error != null) {
+						return reject(error);
+					}
+					self.saveState(self.authState);
+					return resolve({
+						accessToken,
+						idToken,
+					});
+				}
+			);
+		});
+	}
+
 	private authorizeWithConfiguration(
 		config: OIDServiceConfiguration,
 		clientId: string,
@@ -62,6 +92,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 				OIDResponseTypeCode,
 				additionalParameters
 			);
+		const self = this;
 		const rootController = Application.ios.rootController;
 		OIDAuthState.authStateByPresentingAuthorizationRequestPresentingViewControllerCallback(
 			req,
@@ -76,6 +107,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 					reject('authState is undefined');
 					return;
 				}
+				self.saveState(authState);
 				resolve({
 					accessToken: authState.lastTokenResponse.accessToken,
 					idToken: authState.lastTokenResponse.idToken,
@@ -106,5 +138,30 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 		}
 
 		return new OIDServiceConfiguration(config);
+	}
+
+	private saveState(state: OIDAuthState) {
+		this.authState = state;
+		const archivedData = NSKeyedArchiver.archivedDataWithRootObject(state);
+		const archivedDataString =
+			archivedData.base64EncodedStringWithOptions(null);
+		this.writeState(archivedDataString);
+	}
+
+	private loadState(): OIDAuthState {
+		const archivedDataDataString = this.readState();
+		if (archivedDataDataString == null) {
+			return OIDAuthState.alloc();
+		}
+		try {
+			const archivedData = NSData.alloc().initWithBase64EncodedStringOptions(
+				archivedDataDataString,
+				null
+			);
+			return NSKeyedUnarchiver.unarchiveObjectWithData(archivedData);
+		} catch (error) {
+			console.log('Failed to deserialize stored auth state - discarding');
+			return OIDAuthState.alloc();
+		}
 	}
 }
