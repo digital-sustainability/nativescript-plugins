@@ -1,11 +1,11 @@
 {
-	"main": "./src/main.ts",
-	"dependencies": {
-		"@nativescript/core": "file:../../node_modules/@nativescript/core",
-		"@digital-sustainability/nativescript-app-auth": "file:../../dist/packages/nativescript-app-auth"
-	},
-	"devDependencies": {
-		"@nativescript/android": "8.1.1",
-		"@nativescript/ios": "8.0.0"
-	}
+  "main": "./src/main.ts",
+  "dependencies": {
+    "@nativescript/core": "file:../../node_modules/@nativescript/core",
+    "@digital-sustainability/nativescript-app-auth": "file:../../dist/packages/nativescript-app-auth"
+  },
+  "devDependencies": {
+    "@nativescript/android": "8.1.1",
+    "@nativescript/ios": "8.0.0"
+  }
 }
