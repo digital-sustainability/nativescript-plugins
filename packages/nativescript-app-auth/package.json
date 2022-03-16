@@ -1,36 +1,38 @@
 {
   "name": "@digital-sustainability/nativescript-app-auth",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Add a plugin description",
   "main": "index",
   "typings": "index.d.ts",
   "nativescript": {
     "platforms": {
-      "ios": "6.0.0",
-      "android": "6.0.0"
+      "ios": "8.0.0",
+      "android": "8.1.1"
     }
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/digital-sustainability/nativescript-plugins"
+    "url": "https://github.com/NativeScript/plugins.git"
   },
   "keywords": [
     "NativeScript",
     "JavaScript",
     "TypeScript",
     "iOS",
-    "Android",
-    "AppAuth",
-    "OAuth2"
+    "Android"
   ],
   "author": {
-    "name": "Research Center for Digital Sustainability"
+    "name": "NativeScript",
+    "email": "oss@nativescript.org"
   },
   "bugs": {
-    "url": "https://github.com/digital-sustainability/nativescript-plugins"
+    "url": "https://github.com/NativeScript/plugins/issues"
   },
   "license": "Apache-2.0",
-  "homepage": "https://github.com/digital-sustainability/nativescript-plugins",
+  "homepage": "https://github.com/NativeScript/plugins",
   "readmeFilename": "README.md",
-  "bootstrapper": "@nativescript/plugin-seed"
+  "bootstrapper": "@nativescript/plugin-seed",
+  "dependencies": {
+    "@nativescript/secure-storage": "^3.0.0"
+  }
 }

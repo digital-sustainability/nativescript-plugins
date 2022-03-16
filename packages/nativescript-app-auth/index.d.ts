@@ -24,7 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import { NativescriptAppAuthCommon } from './common';
 
 export declare class NativescriptAppAuth extends NativescriptAppAuthCommon {
-    static authorize(config: AuthConfiguration): Promise<AuthorizeResult>; 
+  authorize(config: AuthConfiguration): Promise<AuthorizeResult>;
+  fetchFreshTokens(): Promise<FreshTokenConfiguration>;
 }
 
 export interface ServiceConfiguration {
@@ -66,7 +67,9 @@ export type RegistrationConfiguration = BaseConfiguration & {
   grantTypes?: string[];
   subjectType?: string;
   tokenEndpointAuthMethod?: string;
-  additionalParameters?: BuiltInRegistrationParameters & { [name: string]: string };
+  additionalParameters?: BuiltInRegistrationParameters & {
+    [name: string]: string;
+  };
   dangerouslyAllowInsecureHttpRequests?: boolean;
   customHeaders?: CustomHeaders;
   additionalHeaders?: AdditionalHeaders;
@@ -142,7 +145,9 @@ export interface RefreshConfiguration {
 
 export function prefetchConfiguration(config: AuthConfiguration): Promise<void>;
 
-export function register(config: RegistrationConfiguration): Promise<RegistrationResponse>;
+export function register(
+  config: RegistrationConfiguration
+): Promise<RegistrationResponse>;
 
 export function authorize(config: AuthConfiguration): Promise<AuthorizeResult>;
 
@@ -173,7 +178,9 @@ type OAuthTokenErrorCode =
   | 'unsupported_grant_type'
   | 'invalid_scope';
 // https://openid.net/specs/openid-connect-registration-1_0.html#RegistrationError
-type OICRegistrationErrorCode = 'invalid_redirect_uri' | 'invalid_client_metadata';
+type OICRegistrationErrorCode =
+  | 'invalid_redirect_uri'
+  | 'invalid_client_metadata';
 type AppAuthErrorCode =
   | 'service_configuration_fetch_error'
   | 'authentication_failed'
@@ -189,4 +196,9 @@ type ErrorCode =
 
 export interface AppAuthError extends Error {
   code: ErrorCode;
+}
+
+export interface FreshTokenConfiguration {
+  accessToken: string;
+  idToken: string;
 }

@@ -5,7 +5,7 @@
     "@digital-sustainability/nativescript-app-auth": "file:../../dist/packages/nativescript-app-auth"
   },
   "devDependencies": {
-    "@nativescript/android": "8.0.0",
+    "@nativescript/android": "8.1.1",
     "@nativescript/ios": "8.0.0"
   }
 }

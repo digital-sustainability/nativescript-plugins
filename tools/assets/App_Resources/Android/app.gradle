@@ -5,17 +5,18 @@
 //	compile 'com.android.support:recyclerview-v7:+'
 //}
 
-android {  
-  compileSdkVersion 29
-  defaultConfig {  
-    minSdkVersion 21
-    targetSdkVersion 29
+android {
+  compileSdkVersion 30
+  defaultConfig {
+    minSdkVersion 19
+    targetSdkVersion 30
+    multiDexEnabled true
     generatedDensities = []
     manifestPlaceholders = [
       appAuthRedirectScheme: '<YOUR_REDIRECT_SCHEME>'
     ]
-  }  
-  aaptOptions {  
-    additionalParameters "--no-version-vectors"  
-  }  
-} 
+  }
+  aaptOptions {
+    additionalParameters "--no-version-vectors"
+  }
+}
