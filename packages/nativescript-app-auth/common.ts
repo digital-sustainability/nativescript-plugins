@@ -6,7 +6,7 @@ const STATE_KEY = 'appAuthState';
 export class NativescriptAppAuthCommon {
   private secureStorage: SecureStorage;
 
-  constructor() {
+  protected constructor() {
     this.secureStorage = new SecureStorage();
   }
 

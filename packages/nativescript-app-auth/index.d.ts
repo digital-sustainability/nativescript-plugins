@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import { NativescriptAppAuthCommon } from './common';
 
 export declare class NativescriptAppAuth extends NativescriptAppAuthCommon {
+  static getInstance(): NativescriptAppAuth;
   authorize(config: AuthConfiguration): Promise<AuthorizeResult>;
   fetchFreshTokens(): Promise<FreshTokenConfiguration>;
   logout(): void;

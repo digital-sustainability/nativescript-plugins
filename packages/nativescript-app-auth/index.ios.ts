@@ -8,11 +8,20 @@ import {
 import { NativescriptAppAuthCommon } from './common';
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
+  private static instance: NativescriptAppAuth;
   private authState: OIDAuthState;
 
-  constructor() {
+  private constructor() {
     super();
     this.authState = this.loadState();
+  }
+
+  static getInstance(): NativescriptAppAuth {
+    if (!NativescriptAppAuth.instance) {
+      NativescriptAppAuth.instance = new NativescriptAppAuth();
+    }
+
+    return NativescriptAppAuth.instance;
   }
 
   authorize({

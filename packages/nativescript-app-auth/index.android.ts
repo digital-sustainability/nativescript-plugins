@@ -15,11 +15,20 @@ import { NativescriptAppAuthCommon } from './common';
 const RC_AUTH = 52;
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
+  private static instance: NativescriptAppAuth;
   private authState: net.openid.appauth.AuthState;
 
-  constructor() {
+  private constructor() {
     super();
     this.authState = this.loadState();
+  }
+
+  static getInstance(): NativescriptAppAuth {
+    if (!NativescriptAppAuth.instance) {
+      NativescriptAppAuth.instance = new NativescriptAppAuth();
+    }
+
+    return NativescriptAppAuth.instance;
   }
 
   private _onActivityResult({
