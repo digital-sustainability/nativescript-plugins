@@ -26,6 +26,7 @@ import { NativescriptAppAuthCommon } from './common';
 export declare class NativescriptAppAuth extends NativescriptAppAuthCommon {
   authorize(config: AuthConfiguration): Promise<AuthorizeResult>;
   fetchFreshTokens(): Promise<FreshTokenConfiguration>;
+  logout(): void;
 }
 
 export interface ServiceConfiguration {

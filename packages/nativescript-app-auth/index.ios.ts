@@ -74,6 +74,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     });
   }
 
+  logout(): void {
+    //TODO Add identity provider logout support. Use prompt: login as a workaround.
+    this.authState = OIDAuthState.alloc();
+    this.saveState(this.authState);
+  }
+
   private authorizeWithConfiguration(
     config: OIDServiceConfiguration,
     clientId: string,
