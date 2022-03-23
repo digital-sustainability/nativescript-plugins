@@ -205,7 +205,3 @@ export interface FreshTokenConfiguration {
   accessToken: string;
   idToken: string;
 }
-
-export declare class NativescriptAppAuthError extends Error {
-  code: number;
-}

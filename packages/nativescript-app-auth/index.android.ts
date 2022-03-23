@@ -56,7 +56,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
     // == null checks for undefined as well
     if (intent == null) {
-      reject(new NativescriptAppAuthError('Intent is null', 1008));
+      reject(
+        new NativescriptAppAuthError(
+          'authentication_failed: Intent is null',
+          1008
+        )
+      );
       return;
     }
 
@@ -71,12 +76,19 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       if (exception != null) {
         reject(
           new NativescriptAppAuthError(
-            exception.error ?? exception.errorDescription,
+            exception.error ??
+              exception.errorDescription ??
+              'authentication_failed',
             exception.code
           )
         );
       } else {
-        reject(new NativescriptAppAuthError('Response is null', 1008));
+        reject(
+          new NativescriptAppAuthError(
+            'authentication_failed: Response is null',
+            1008
+          )
+        );
       }
       return;
     }
@@ -95,7 +107,9 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           if (error != null) {
             reject(
               new NativescriptAppAuthError(
-                error.error ?? error.errorDescription,
+                error.error ??
+                  error.errorDescription ??
+                  'token_exchange_failed',
                 error.code
               )
             );
@@ -203,7 +217,9 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
               if (error != null) {
                 reject(
                   new NativescriptAppAuthError(
-                    error.error ?? error.errorDescription,
+                    error.error ??
+                      error.errorDescription ??
+                      'service_configuration_fetch_error',
                     error.code
                   )
                 );
@@ -236,7 +252,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
             if (ex != null) {
               return reject(
                 new NativescriptAppAuthError(
-                  ex.error ?? ex.errorDescription,
+                  ex.error ?? ex.errorDescription ?? 'token_refresh_failed',
                   ex.code
                 )
               );
