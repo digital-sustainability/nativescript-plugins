@@ -2,6 +2,7 @@ import { Application } from '@nativescript/core';
 import {
   AuthConfiguration,
   AuthorizeResult,
+  BuiltInParameters,
   FreshTokenConfiguration,
   ServiceConfiguration,
 } from '.';
@@ -30,6 +31,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     redirectUrl,
     issuer,
     scopes,
+    additionalParameters,
   }: AuthConfiguration): Promise<AuthorizeResult> {
     if (this.isServiceConfiguration(serviceConfiguration)) {
       const config = this.createServiceConfiguration(serviceConfiguration);
@@ -40,7 +42,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           redirectUrl,
           scopes,
           resolve,
-          reject
+          reject,
+          additionalParameters
         )
       );
     }
@@ -58,7 +61,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
             redirectUrl,
             scopes,
             resolve,
-            reject
+            reject,
+            additionalParameters
           );
         }
       )
@@ -94,10 +98,23 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     clientId: string,
     redirectUri: string,
     scopes: string[],
-    resolve,
-    reject
+    resolve: (value: AuthorizeResult | PromiseLike<AuthorizeResult>) => void,
+    reject: (reason?: any) => void,
+    additionalParameters?: BuiltInParameters & {
+      [name: string]: string;
+    }
   ): void {
-    const additionalParameters = NSDictionary.new<string, string>();
+    const additionalParameterDictionary = NSMutableDictionary.new<
+      string,
+      string
+    >();
+
+    if (additionalParameters) {
+      for (const entry of Object.entries(additionalParameters)) {
+        additionalParameterDictionary.setObjectForKey(entry[1], entry[0]);
+      }
+    }
+
     const req =
       OIDAuthorizationRequest.alloc().initWithConfigurationClientIdScopesRedirectURLResponseTypeAdditionalParameters(
         config,
@@ -105,7 +122,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         NSArray.arrayWithArray(scopes),
         NSURL.URLWithString(redirectUri),
         OIDResponseTypeCode,
-        additionalParameters
+        additionalParameterDictionary
       );
     const self = this;
     const rootController = Application.ios.rootController;
@@ -127,6 +144,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           accessToken: authState.lastTokenResponse.accessToken,
           idToken: authState.lastTokenResponse.idToken,
           refreshToken: authState.lastTokenResponse.refreshToken,
+          accessTokenExpirationDate:
+            authState.lastTokenResponse.accessTokenExpirationDate.getTime(),
           tokenType: authState.lastTokenResponse.tokenType,
           scopes: authState.lastTokenResponse.scope?.split(' ') ?? [],
           authorizationCode:

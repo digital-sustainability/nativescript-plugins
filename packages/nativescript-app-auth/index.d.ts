@@ -115,7 +115,7 @@ export type AuthConfiguration = BaseAuthConfiguration & {
 
 export interface AuthorizeResult {
   accessToken: string;
-  accessTokenExpirationDate: string;
+  accessTokenExpirationDate: number;
   authorizeAdditionalParameters?: { [name: string]: string };
   tokenAdditionalParameters?: { [name: string]: string };
   idToken: string;
