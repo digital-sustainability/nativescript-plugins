@@ -6,7 +6,7 @@ import {
   FreshTokenConfiguration,
   ServiceConfiguration,
 } from '.';
-import { NativescriptAppAuthCommon } from './common';
+import { NativescriptAppAuthCommon, NativescriptAppAuthError } from './common';
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
   private static instance: NativescriptAppAuth;
@@ -52,7 +52,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         NSURL.URLWithString(issuer),
         (fetchedConfiguration, error) => {
           if (error) {
-            reject(error);
+            reject(
+              new NativescriptAppAuthError(
+                error.localizedDescription,
+                error.code
+              )
+            );
             return;
           }
           this.authorizeWithConfiguration(
@@ -75,7 +80,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       this.authState.performActionWithFreshTokens(
         (accessToken, idToken, error) => {
           if (error != null) {
-            return reject(error);
+            return reject(
+              new NativescriptAppAuthError(
+                error.localizedDescription,
+                error.code
+              )
+            );
           }
           self.saveState(self.authState);
           return resolve({
@@ -131,12 +141,14 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       rootController,
       (authState, error) => {
         if (error != null) {
-          reject(error);
+          reject(
+            new NativescriptAppAuthError(error.localizedDescription, error.code)
+          );
           return;
         }
         // TODO: add typeguard
         if (authState == null) {
-          reject('authState is undefined');
+          reject(new NativescriptAppAuthError('AuthState is undefined', 0));
           return;
         }
         self.saveState(authState);
@@ -194,7 +206,9 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       );
       return NSKeyedUnarchiver.unarchiveObjectWithData(archivedData);
     } catch (error) {
-      console.log('Failed to deserialize stored auth state - discarding');
+      console.log(
+        'NativescriptAppAuth: Failed to deserialize stored auth state - discarding'
+      );
       return OIDAuthState.alloc();
     }
   }

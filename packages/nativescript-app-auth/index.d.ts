@@ -163,6 +163,7 @@ export function revoke(
   revokeConfig: RevokeConfiguration
 ): Promise<void>;
 
+//TODO advanced typed errors
 // https://tools.ietf.org/html/rfc6749#section-4.1.2.1
 type OAuthAuthorizationErrorCode =
   | 'unauthorized_client'
@@ -203,4 +204,8 @@ export interface AppAuthError extends Error {
 export interface FreshTokenConfiguration {
   accessToken: string;
   idToken: string;
+}
+
+export declare class NativescriptAppAuthError extends Error {
+  code: number;
 }

@@ -31,3 +31,13 @@ export class NativescriptAppAuthCommon {
     });
   }
 }
+
+export class NativescriptAppAuthError extends Error {
+  name = 'NativescriptAppAuthError';
+  code: number;
+
+  constructor(message: string, code: number) {
+    super(message);
+    this.code = code;
+  }
+}

@@ -11,7 +11,7 @@ import {
   FreshTokenConfiguration,
   ServiceConfiguration,
 } from '.';
-import { NativescriptAppAuthCommon } from './common';
+import { NativescriptAppAuthCommon, NativescriptAppAuthError } from './common';
 
 const RC_AUTH = 52;
 
@@ -56,7 +56,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
     // == null checks for undefined as well
     if (intent == null) {
-      reject('error: intent is null');
+      reject(new NativescriptAppAuthError('Intent is null', 1008));
       return;
     }
 
@@ -69,9 +69,14 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
     if (response == null) {
       if (exception != null) {
-        reject(`${exception.error}: ${exception.errorDescription}`);
+        reject(
+          new NativescriptAppAuthError(
+            exception.error ?? exception.errorDescription,
+            exception.code
+          )
+        );
       } else {
-        reject('error: response is null');
+        reject(new NativescriptAppAuthError('Response is null', 1008));
       }
       return;
     }
@@ -88,7 +93,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         onTokenRequestCompleted(resp, error) {
           self.updateAuthState(resp, error);
           if (error != null) {
-            reject(error);
+            reject(
+              new NativescriptAppAuthError(
+                error.error ?? error.errorDescription,
+                error.code
+              )
+            );
             return;
           }
           if (resp) {
@@ -191,7 +201,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           {
             onFetchConfigurationCompleted(fetchedConfiguration, error) {
               if (error != null) {
-                reject(error);
+                reject(
+                  new NativescriptAppAuthError(
+                    error.error ?? error.errorDescription,
+                    error.code
+                  )
+                );
               }
               self.authorizeWithConfiguration(
                 fetchedConfiguration,
@@ -219,7 +234,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         new net.openid.appauth.AuthState.AuthStateAction({
           execute(accessToken, idToken, ex) {
             if (ex != null) {
-              return reject(ex);
+              return reject(
+                new NativescriptAppAuthError(
+                  ex.error ?? ex.errorDescription,
+                  ex.code
+                )
+              );
             }
 
             self.saveState(self.authState);
@@ -277,7 +297,9 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     try {
       return net.openid.appauth.AuthState.jsonDeserialize(serializedState);
     } catch (error) {
-      console.log('Failed to deserialize stored auth state - discarding');
+      console.log(
+        'NativescriptAppAuth: Failed to deserialize stored auth state - discarding'
+      );
       return new net.openid.appauth.AuthState();
     }
   }
