@@ -99,7 +99,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
   logout(): void {
     //TODO Add identity provider logout support. Use prompt: login as a workaround.
-    this.authState = OIDAuthState.alloc();
+    this.authState = OIDAuthState.alloc().initWithAuthorizationResponse(null);
     this.saveState(this.authState);
   }
 
@@ -197,7 +197,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
   private loadState(): OIDAuthState {
     const archivedDataDataString = this.readState();
     if (archivedDataDataString == null) {
-      return OIDAuthState.alloc();
+      return OIDAuthState.alloc().initWithAuthorizationResponse(null);
     }
     try {
       const archivedData = NSData.alloc().initWithBase64EncodedStringOptions(
@@ -209,7 +209,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       console.log(
         'NativescriptAppAuth: Failed to deserialize stored auth state - discarding'
       );
-      return OIDAuthState.alloc();
+      return OIDAuthState.alloc().initWithAuthorizationResponse(null);
     }
   }
 }
