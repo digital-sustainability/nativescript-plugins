@@ -1,6 +1,6 @@
 {
   "name": "@digital-sustainability/nativescript-app-auth",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Add a plugin description",
   "main": "index",
   "typings": "index.d.ts",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NativeScript/plugins.git"
+    "url": "https://github.com/digital-sustainability/nativescript-plugins.git"
   },
   "keywords": [
     "NativeScript",
@@ -26,10 +26,10 @@
     "email": "oss@nativescript.org"
   },
   "bugs": {
-    "url": "https://github.com/NativeScript/plugins/issues"
+    "url": "https://github.com/digital-sustainability/nativescript-plugins/issues"
   },
   "license": "Apache-2.0",
-  "homepage": "https://github.com/NativeScript/plugins",
+  "homepage": "https://github.com/digital-sustainability/nativescript-plugins/tree/main/packages/nativescript-app-auth",
   "readmeFilename": "README.md",
   "bootstrapper": "@nativescript/plugin-seed",
   "dependencies": {
