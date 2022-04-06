@@ -6,7 +6,7 @@ const STATE_KEY = 'appAuthState';
 export class NativescriptAppAuthCommon {
   private secureStorage: SecureStorage;
 
-  constructor() {
+  protected constructor() {
     this.secureStorage = new SecureStorage();
   }
 
@@ -29,5 +29,15 @@ export class NativescriptAppAuthCommon {
     return this.secureStorage.getSync({
       key: STATE_KEY,
     });
+  }
+}
+
+export class NativescriptAppAuthError extends Error {
+  name = 'NativescriptAppAuthError';
+  code: number;
+
+  constructor(message: string, code: number) {
+    super(message);
+    this.code = code;
   }
 }

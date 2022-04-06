@@ -2,17 +2,27 @@ import { Application } from '@nativescript/core';
 import {
   AuthConfiguration,
   AuthorizeResult,
+  BuiltInParameters,
   FreshTokenConfiguration,
   ServiceConfiguration,
 } from '.';
-import { NativescriptAppAuthCommon } from './common';
+import { NativescriptAppAuthCommon, NativescriptAppAuthError } from './common';
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
+  private static instance: NativescriptAppAuth;
   private authState: OIDAuthState;
 
-  constructor() {
+  private constructor() {
     super();
     this.authState = this.loadState();
+  }
+
+  static getInstance(): NativescriptAppAuth {
+    if (!NativescriptAppAuth.instance) {
+      NativescriptAppAuth.instance = new NativescriptAppAuth();
+    }
+
+    return NativescriptAppAuth.instance;
   }
 
   authorize({
@@ -21,6 +31,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     redirectUrl,
     issuer,
     scopes,
+    additionalParameters,
   }: AuthConfiguration): Promise<AuthorizeResult> {
     if (this.isServiceConfiguration(serviceConfiguration)) {
       const config = this.createServiceConfiguration(serviceConfiguration);
@@ -31,7 +42,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           redirectUrl,
           scopes,
           resolve,
-          reject
+          reject,
+          additionalParameters
         )
       );
     }
@@ -40,7 +52,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         NSURL.URLWithString(issuer),
         (fetchedConfiguration, error) => {
           if (error) {
-            reject(error);
+            reject(
+              new NativescriptAppAuthError(
+                error.localizedDescription,
+                error.code
+              )
+            );
             return;
           }
           this.authorizeWithConfiguration(
@@ -49,7 +66,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
             redirectUrl,
             scopes,
             resolve,
-            reject
+            reject,
+            additionalParameters
           );
         }
       )
@@ -62,7 +80,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       this.authState.performActionWithFreshTokens(
         (accessToken, idToken, error) => {
           if (error != null) {
-            return reject(error);
+            return reject(
+              new NativescriptAppAuthError(
+                error.localizedDescription,
+                error.code
+              )
+            );
           }
           self.saveState(self.authState);
           return resolve({
@@ -74,15 +97,34 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     });
   }
 
+  logout(): void {
+    //TODO Add identity provider logout support. Use prompt: login as a workaround.
+    this.authState = OIDAuthState.alloc().initWithAuthorizationResponse(null);
+    this.saveState(this.authState);
+  }
+
   private authorizeWithConfiguration(
     config: OIDServiceConfiguration,
     clientId: string,
     redirectUri: string,
     scopes: string[],
-    resolve,
-    reject
+    resolve: (value: AuthorizeResult | PromiseLike<AuthorizeResult>) => void,
+    reject: (reason?: any) => void,
+    additionalParameters?: BuiltInParameters & {
+      [name: string]: string;
+    }
   ): void {
-    const additionalParameters = NSDictionary.new<string, string>();
+    const additionalParameterDictionary = NSMutableDictionary.new<
+      string,
+      string
+    >();
+
+    if (additionalParameters) {
+      for (const entry of Object.entries(additionalParameters)) {
+        additionalParameterDictionary.setObjectForKey(entry[1], entry[0]);
+      }
+    }
+
     const req =
       OIDAuthorizationRequest.alloc().initWithConfigurationClientIdScopesRedirectURLResponseTypeAdditionalParameters(
         config,
@@ -90,7 +132,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         NSArray.arrayWithArray(scopes),
         NSURL.URLWithString(redirectUri),
         OIDResponseTypeCode,
-        additionalParameters
+        additionalParameterDictionary
       );
     const self = this;
     const rootController = Application.ios.rootController;
@@ -99,12 +141,14 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       rootController,
       (authState, error) => {
         if (error != null) {
-          reject(error);
+          reject(
+            new NativescriptAppAuthError(error.localizedDescription, error.code)
+          );
           return;
         }
         // TODO: add typeguard
         if (authState == null) {
-          reject('authState is undefined');
+          reject(new NativescriptAppAuthError('AuthState is undefined', 0));
           return;
         }
         self.saveState(authState);
@@ -112,6 +156,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           accessToken: authState.lastTokenResponse.accessToken,
           idToken: authState.lastTokenResponse.idToken,
           refreshToken: authState.lastTokenResponse.refreshToken,
+          accessTokenExpirationDate:
+            authState.lastTokenResponse.accessTokenExpirationDate.getTime(),
           tokenType: authState.lastTokenResponse.tokenType,
           scopes: authState.lastTokenResponse.scope?.split(' ') ?? [],
           authorizationCode:
@@ -151,7 +197,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
   private loadState(): OIDAuthState {
     const archivedDataDataString = this.readState();
     if (archivedDataDataString == null) {
-      return OIDAuthState.alloc();
+      return OIDAuthState.alloc().initWithAuthorizationResponse(null);
     }
     try {
       const archivedData = NSData.alloc().initWithBase64EncodedStringOptions(
@@ -160,8 +206,10 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
       );
       return NSKeyedUnarchiver.unarchiveObjectWithData(archivedData);
     } catch (error) {
-      console.log('Failed to deserialize stored auth state - discarding');
-      return OIDAuthState.alloc();
+      console.log(
+        'NativescriptAppAuth: Failed to deserialize stored auth state - discarding'
+      );
+      return OIDAuthState.alloc().initWithAuthorizationResponse(null);
     }
   }
 }

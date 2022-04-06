@@ -24,8 +24,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import { NativescriptAppAuthCommon } from './common';
 
 export declare class NativescriptAppAuth extends NativescriptAppAuthCommon {
+  static getInstance(): NativescriptAppAuth;
   authorize(config: AuthConfiguration): Promise<AuthorizeResult>;
   fetchFreshTokens(): Promise<FreshTokenConfiguration>;
+  logout(): void;
 }
 
 export interface ServiceConfiguration {
@@ -113,7 +115,7 @@ export type AuthConfiguration = BaseAuthConfiguration & {
 
 export interface AuthorizeResult {
   accessToken: string;
-  accessTokenExpirationDate: string;
+  accessTokenExpirationDate: number;
   authorizeAdditionalParameters?: { [name: string]: string };
   tokenAdditionalParameters?: { [name: string]: string };
   idToken: string;
@@ -161,6 +163,7 @@ export function revoke(
   revokeConfig: RevokeConfiguration
 ): Promise<void>;
 
+//TODO advanced typed errors
 // https://tools.ietf.org/html/rfc6749#section-4.1.2.1
 type OAuthAuthorizationErrorCode =
   | 'unauthorized_client'

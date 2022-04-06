@@ -12,7 +12,7 @@ export class DemoSharedNativescriptAppAuth extends DemoSharedBase {
       scopes: ['<YOUR_SCOPE_ARRAY>'],
     };
 
-    const auth = new NativescriptAppAuth();
+    const auth = NativescriptAppAuth.getInstance();
     auth
       .fetchFreshTokens()
       .then((res) => {

@@ -7,19 +7,29 @@ import {
 import {
   AuthConfiguration,
   AuthorizeResult,
+  BuiltInParameters,
   FreshTokenConfiguration,
   ServiceConfiguration,
 } from '.';
-import { NativescriptAppAuthCommon } from './common';
+import { NativescriptAppAuthCommon, NativescriptAppAuthError } from './common';
 
 const RC_AUTH = 52;
 
 export class NativescriptAppAuth extends NativescriptAppAuthCommon {
+  private static instance: NativescriptAppAuth;
   private authState: net.openid.appauth.AuthState;
 
-  constructor() {
+  private constructor() {
     super();
     this.authState = this.loadState();
+  }
+
+  static getInstance(): NativescriptAppAuth {
+    if (!NativescriptAppAuth.instance) {
+      NativescriptAppAuth.instance = new NativescriptAppAuth();
+    }
+
+    return NativescriptAppAuth.instance;
   }
 
   private _onActivityResult({
@@ -36,11 +46,22 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     );
 
     // @ts-ignore
-    const { resolve, reject } = this;
+    const {
+      resolve,
+      reject,
+    }: {
+      resolve: (value: AuthorizeResult | PromiseLike<AuthorizeResult>) => void;
+      reject: (reason?: any) => void;
+    } = this;
 
     // == null checks for undefined as well
     if (intent == null) {
-      reject('error: intent is null');
+      reject(
+        new NativescriptAppAuthError(
+          'authentication_failed: Intent is null',
+          1008
+        )
+      );
       return;
     }
 
@@ -53,9 +74,21 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
 
     if (response == null) {
       if (exception != null) {
-        reject(`${exception.error}: ${exception.errorDescription}`);
+        reject(
+          new NativescriptAppAuthError(
+            exception.error ??
+              exception.errorDescription ??
+              'authentication_failed',
+            exception.code
+          )
+        );
       } else {
-        reject('error: response is null');
+        reject(
+          new NativescriptAppAuthError(
+            'authentication_failed: Response is null',
+            1008
+          )
+        );
       }
       return;
     }
@@ -72,7 +105,14 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         onTokenRequestCompleted(resp, error) {
           self.updateAuthState(resp, error);
           if (error != null) {
-            reject(error);
+            reject(
+              new NativescriptAppAuthError(
+                error.error ??
+                  error.errorDescription ??
+                  'token_exchange_failed',
+                error.code
+              )
+            );
             return;
           }
           if (resp) {
@@ -81,7 +121,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
               idToken: resp.idToken,
               tokenType: resp.tokenType,
               refreshToken: resp.refreshToken,
-              accessTokenExpirationDate: resp.accessTokenExpirationTime,
+              accessTokenExpirationDate: +resp.accessTokenExpirationTime,
               scopes: resp.scope?.split(' ') ?? [],
               authorizationCode: resp.request.authorizationCode,
             });
@@ -96,8 +136,11 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     clientId: string,
     redirectUri: string,
     scopes: string[],
-    resolve,
-    reject
+    resolve: (value: AuthorizeResult | PromiseLike<AuthorizeResult>) => void,
+    reject: (reason?: any) => void,
+    additionalParameters?: BuiltInParameters & {
+      [name: string]: string;
+    }
   ): void {
     Application.android.on(
       AndroidApplication.activityResultEvent,
@@ -112,6 +155,21 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         net.openid.appauth.ResponseTypeValues.CODE,
         android.net.Uri.parse(redirectUri)
       );
+
+    if (additionalParameters) {
+      if (additionalParameters.display) {
+        authRequestBuilder.setDisplay(additionalParameters.display);
+      }
+
+      if (additionalParameters.login_prompt) {
+        authRequestBuilder.setLoginHint(additionalParameters.login_prompt);
+      }
+
+      if (additionalParameters.prompt) {
+        authRequestBuilder.setPrompt(additionalParameters.prompt);
+      }
+    }
+
     const authRequest = authRequestBuilder.setScope(scopes.join(' ')).build();
 
     const context = Utils.android.getApplicationContext();
@@ -132,6 +190,7 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     redirectUrl,
     issuer,
     scopes,
+    additionalParameters,
   }: AuthConfiguration): Promise<AuthorizeResult> {
     const self = this;
     if (this.isServiceConfiguration(serviceConfiguration)) {
@@ -143,7 +202,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           redirectUrl,
           scopes,
           resolve,
-          reject
+          reject,
+          additionalParameters
         )
       );
     }
@@ -155,7 +215,14 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
           {
             onFetchConfigurationCompleted(fetchedConfiguration, error) {
               if (error != null) {
-                reject(error);
+                reject(
+                  new NativescriptAppAuthError(
+                    error.error ??
+                      error.errorDescription ??
+                      'service_configuration_fetch_error',
+                    error.code
+                  )
+                );
               }
               self.authorizeWithConfiguration(
                 fetchedConfiguration,
@@ -163,7 +230,8 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
                 redirectUrl,
                 scopes,
                 resolve,
-                reject
+                reject,
+                additionalParameters
               );
             },
           }
@@ -182,7 +250,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         new net.openid.appauth.AuthState.AuthStateAction({
           execute(accessToken, idToken, ex) {
             if (ex != null) {
-              return reject(ex);
+              return reject(
+                new NativescriptAppAuthError(
+                  ex.error ?? ex.errorDescription ?? 'token_refresh_failed',
+                  ex.code
+                )
+              );
             }
 
             self.saveState(self.authState);
@@ -191,6 +264,12 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
         })
       );
     });
+  }
+
+  logout(): void {
+    //TODO Add identity provider logout support. Use prompt: login as a workaround.
+    this.authState = new net.openid.appauth.AuthState();
+    this.saveState(this.authState);
   }
 
   private createServiceConfiguration(
@@ -234,7 +313,9 @@ export class NativescriptAppAuth extends NativescriptAppAuthCommon {
     try {
       return net.openid.appauth.AuthState.jsonDeserialize(serializedState);
     } catch (error) {
-      console.log('Failed to deserialize stored auth state - discarding');
+      console.log(
+        'NativescriptAppAuth: Failed to deserialize stored auth state - discarding'
+      );
       return new net.openid.appauth.AuthState();
     }
   }
